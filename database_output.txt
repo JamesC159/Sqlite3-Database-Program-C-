@@ -24,7 +24,7 @@ track cd_id = 1 track artist_id = 2 track title = Breathe
 track cd_id = 1 track artist_id = 3 track title = On the run
 track cd_id = 1 track artist_id = 4 track title = Time
 track cd_id = 1 track artist_id = 5 track title = Great gig in the sky
-track cd_id = 1 track artist_id = 6 track title = Moeny
+track cd_id = 1 track artist_id = 6 track title = Mooooney
 track cd_id = 1 track artist_id = 7 track title = Us and them
 track cd_id = 1 track artist_id = 8 track title = Any colour you like
 track cd_id = 1 track artist_id = 9 track title = Brain damage

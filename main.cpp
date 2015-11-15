@@ -57,7 +57,7 @@ struct trackRecord {
  *  Function prototypes
  ********************************************************************************/
 void openInFiles(ifstream &, ifstream &, ifstream &);
-void openOutFiles(ofstream &, ofstream &, ofstream &);
+void openDatabaseOutput(ofstream &);
 void tokenizeArtists (vector<artistRecord*> &, artistRecord *, ifstream &, const char *);
 void tokenizeCds(vector<cdRecord*> &, cdRecord *, ifstream &, const char *);
 void tokenizeTracks(vector<trackRecord*> &, trackRecord *, ifstream &, const char *);
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     
     /* Files to create database from */
     ifstream artistIn, cdIn, trackIn;
-    ofstream artistOut, cdOut, trackOut;
+    ofstream databaseOutput;
     
     /* Vectors to hold structures of records to insert */
     vector<artistRecord*> artists;
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     
     /* Open files */
     openInFiles(artistIn, cdIn, trackIn);
-    openOutFiles(artistOut, cdOut, trackOut);
+    openDatabaseOutput(databaseOutput);
     
     /* Tokenize artist.txt, cd.txt, and track.txt */
     tokenizeArtists(artists, artist, artistIn, DELIMS);
@@ -230,32 +230,32 @@ int main(int argc, char **argv) {
     
     
     // loop each record in artist table
-    artistOut << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    databaseOutput << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        artistOut << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
+        databaseOutput << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
                     << sqlite3_column_text(statement, 1) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
-    artistOut << endl;
+    databaseOutput << endl;
     
-    artistOut << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    databaseOutput << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
     sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        artistOut << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
+        databaseOutput << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
                     << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
                     << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
-    artistOut << endl;
+    databaseOutput << endl;
     
-    artistOut << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    databaseOutput << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
     sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        artistOut << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
+        databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
         << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
     }
     sqlite3_finalize(statement);  // and done
@@ -272,11 +272,11 @@ int main(int argc, char **argv) {
     execDatabaseMenu(&db);
     
     /* Display updated record */
-    artistOut << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+    databaseOutput << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
     cout << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
     sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        artistOut << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
+        databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
                     << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
         cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
                 << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
@@ -317,11 +317,9 @@ void openInFiles(ifstream &artistFile, ifstream &cdFile, ifstream &trackFile) {
 /********************************************************************************
  *  Opens output files and checks status
  ********************************************************************************/
-void openOutFiles(ofstream &artistFile, ofstream &cdFile, ofstream &trackFile) {
-    artistFile.open("artist_out.txt");
-    cdFile.open("cd_out.txt");
-    trackFile.open("track_out.txt");
-    if (!artistFile.good() || !cdFile.good() || !trackFile.good()) {
+void openDatabaseOutput(ofstream &output) {
+    output.open("database_output.txt");
+    if (!output.good()) {
         cerr << "ERROR: did not successfully open all files\n";
         exit(1);
     }
