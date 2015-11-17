@@ -69,7 +69,7 @@ void openDatabaseOutput(ofstream &);
 void tokenizeArtists (vector<artistRecord*> &, artistRecord *, ifstream &, const char *);
 void tokenizeCds(vector<cdRecord*> &, cdRecord *, ifstream &, const char *);
 void tokenizeTracks(vector<trackRecord*> &, trackRecord *, ifstream &, const char *);
-void execDatabaseMenu(sqlite3 **);
+void dbMenu(sqlite3 **);
 
 /********************************************************************************
  *  Main Function
@@ -281,6 +281,8 @@ int main(int argc, char **argv) {
     }
     sqlite3_finalize(statement);  // and done
     
+    cout << endl;
+    
     
     
     /**
@@ -290,7 +292,7 @@ int main(int argc, char **argv) {
     
     
     /* Menu system to select updating a database record */
-    execDatabaseMenu(&db);
+    dbMenu(&db);
     
     /* Display updated record */
     databaseOutput << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
@@ -303,6 +305,8 @@ int main(int argc, char **argv) {
                 << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
     }
     sqlite3_finalize(statement);  // and done
+    
+    cout << endl;
     
     
     
@@ -363,32 +367,43 @@ int main(int argc, char **argv) {
      *  Integrity Checks
      */
     
+    string input = "";
+    cout << "BEGGINING INTEGRITY CHECKS\n________________________________________________________\n\n";
+    cout << "Please enter an Artist ID to search for the cooresponding artist in the CD map: ";
+    cin >> input;
+    
     for (map<int, Cd*>::iterator it = cdMap.begin();
          it != cdMap.end(); ++it) {
-        Artist *artist = it->second->getArtist(4, artistMap);
+        Artist *artist = it->second->getArtist(atoi(input.c_str()), artistMap);
         if (artist == NULL){
-            cerr << "\nArtist was not found" << endl << endl;
+            cerr << "Integrity Corrupted! Artist object does not exist" << endl << endl;
             break;
         } else {
-            cout << endl << artist->getName() << endl << endl;
+            cout << "Artist: " << artist->getName() << endl << endl;
             break;
         }
     }
     
+    cout << "Please enter a CD ID to search for the cooresponding CD in the Track map: ";
+    cin >> input;
+    
     for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
          it != trackMap.end(); ++it) {
-        Cd *cd = it->second->getCd(1, cdMap);
+        Cd *cd = it->second->getCd(atoi(input.c_str()
+                              ), cdMap);
         if (cd == NULL){
-            cerr << "CD was not found" << endl << endl;
+            cerr << "Integrity Corrupted! CD object does not exist" << endl << endl;
             break;
         } else {
-            cout << endl << cd->getTitle() << endl << endl;
+            cout << "CD: " << cd->getTitle() << endl << endl;
             break;
         }
 
     }
     
     /* Simulate breaking the integrity of the database by inserting a record into the database */
+    cout << "SIMULATING INTEGRITY CORRUPTION\n________________________________________________________\n\n";
+    cout << "Inserting a new record with new cooresponding Artist ID into the CD table.\nThis record will not be added to the CD map\n\n";
     sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
     strcpy(sql, "insert into cd(id, title, artist_id, catalogue) values(7, 'Northern Start', 5, 'B00004YMST');");
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
@@ -398,15 +413,16 @@ int main(int argc, char **argv) {
     }
     free(sql);
     
+    cout << "Checking to see that the integrity of the system has been broken...\n\n";
     
     for (map<int, Cd*>::iterator it = cdMap.begin();
          it != cdMap.end(); ++it) {
         Artist *artist = it->second->getArtist(5, artistMap);
         if (artist == NULL){
-            cerr << "\nArtist object does not exist" << endl << endl;
+            cerr << "Integrity Corrupted! Artist object does not exist!" << endl << endl;
             break;
         } else {
-            cout << endl << artist->getName() << endl << endl;
+            cout << "Artist: " << artist->getName() << endl << endl;
             break;
         }
     }
@@ -622,7 +638,7 @@ void tokenizeTracks (vector<trackRecord*> &tracks, trackRecord *track, ifstream 
  *  Menu system used to Insert, Delete, Update, and Delete All records from
  *  the song database. Currently only used to update the track table titles
  ********************************************************************************/
-void execDatabaseMenu(sqlite3 **db) {
+void dbMenu(sqlite3 **db) {
     int choice = -1;
     int tableChoice = -1;
     string title;
