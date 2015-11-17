@@ -15,7 +15,12 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <sqlite3.h>
+
+#include "Artist.hpp"
+#include "Cd.hpp"
+#include "Track.hpp"
 
 using namespace std;
 
@@ -53,6 +58,9 @@ struct trackRecord {
     char *title;
 };
 
+/***** GLOBAL CONSTANTS *******/
+const int SQL_STMT_SIZE = 250;
+
 /********************************************************************************
  *  Function prototypes
  ********************************************************************************/
@@ -84,9 +92,22 @@ int main(int argc, char **argv) {
     vector<artistRecord*> artists;
     vector<cdRecord*> cds;
     vector<trackRecord*> tracks;
+    
+    /* Structures to represent a record in the database */
     struct artistRecord *artist;
     struct cdRecord *cd;
     struct trackRecord *track;
+    
+    /* Vectors to hold objects of each table in the database */
+    vector<Artist*> artistObjects;
+    vector<Cd*> cdObjects;
+    vector<Track*> trackObjects;
+    
+    /* Maps to hold objects as records */
+    static map<int, Artist*> artistMap;
+    static map<int, Cd*> cdMap;
+    static map<pair<int, int>, Track*> trackMap;
+    
     
     /* Open files */
     openInFiles(artistIn, cdIn, trackIn);
@@ -115,7 +136,7 @@ int main(int argc, char **argv) {
     }
     
     /* Create database tables */
-    sql = (char *) malloc (100 * sizeof(char));
+    sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
     strcpy(sql, "create table artist ( id INTEGER AUTO_INCREMENT NOT NULL PRIMARY KEY,");
     strcat(sql, "name VARCHAR(100) NOT NULL);");
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
@@ -127,7 +148,7 @@ int main(int argc, char **argv) {
     }
     free(sql);
     
-    sql = (char *) malloc (200 * sizeof(char));
+    sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
     strcpy(sql, "create table cd ( id INTEGER AUTO_INCREMENT NOT NULL PRIMARY KEY,");
     strcat(sql, "title VARCHAR(70) NOT NULL,");
     strcat(sql, "artist_id INTEGER NOT NULL,");
@@ -141,7 +162,7 @@ int main(int argc, char **argv) {
     }
     free(sql);
     
-    sql = (char *) malloc (200 * sizeof(char));
+    sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
     strcpy(sql, "create table track ( cd_id INTEGER NOT NULL,");
     strcat(sql, "track_id INTEGER NOT NULL,");
     strcat(sql, "title VARCHAR(70),");
@@ -157,9 +178,9 @@ int main(int argc, char **argv) {
     
     /* Insert records into artist, cd, and track tables */
     for (int i = 0; i < artists.size(); i++) {
-        char *idBuf = (char *) malloc (100 * sizeof(char));
+        char *idBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         sprintf(idBuf, "%d", artists[i]->id);  // convert artist id's into char*'s
-        sql = (char *) malloc (100 * sizeof(char));
+        sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         strcpy(sql, "insert into artist(id, name) values(");
         strcat(sql, idBuf);
         strcat(sql, ", '");
@@ -175,11 +196,11 @@ int main(int argc, char **argv) {
     }
     
     for (int i = 0; i < cds.size(); i++) {
-        char *idBuf = (char *) malloc (100 * sizeof(char));
-        char *artistIdBuf = (char *) malloc (100 * sizeof(char));
+        char *idBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+        char *artistIdBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         sprintf(idBuf, "%d", cds[i]->id);
         sprintf(artistIdBuf, "%d", cds[i]->artistId);
-        sql = (char *) malloc (200 * sizeof(char));
+        sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         strcpy(sql, "insert into cd(id, title, artist_id, catalogue) values(");
         strcat(sql, idBuf);
         strcat(sql, ", '");
@@ -199,11 +220,11 @@ int main(int argc, char **argv) {
     }
     
     for (int i = 0; i < tracks.size(); i++) {
-        char *cdIdBuf = (char *) malloc (100 * sizeof(char));
-        char *trackIdBuf = (char *) malloc (100 * sizeof(char));
+        char *cdIdBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+        char *trackIdBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         sprintf(cdIdBuf, "%d", tracks[i]->cdId);
         sprintf(trackIdBuf, "%d", tracks[i]->trackId);
-        sql = (char *) malloc (200 * sizeof(char));
+        sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         strcpy(sql, "insert into track(cd_id, track_id, title) values(");
         strcat(sql, cdIdBuf);
         strcat(sql, ", ");
@@ -235,7 +256,7 @@ int main(int argc, char **argv) {
     sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
-                    << sqlite3_column_text(statement, 1) << endl;
+                        << sqlite3_column_text(statement, 1) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
@@ -245,8 +266,8 @@ int main(int argc, char **argv) {
     sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
-                    << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
-                    << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+                        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
+                        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
@@ -256,7 +277,7 @@ int main(int argc, char **argv) {
     sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+                        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
@@ -290,7 +311,143 @@ int main(int argc, char **argv) {
      */
     
     
+    /**
+     *  Part A5 Delete all SQL Statements
+     */
     
+    Artist *artistObject;
+    sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        // print each field 0, field 1, etc..
+        artistObject = new Artist();
+        artistObject->setId(sqlite3_column_int(statement, 0));
+        artistObject->setName(sqlite3_column_text(statement, 1));
+        artistObjects.push_back(artistObject);
+        artistMap.insert(pair<int, Artist*>(artistObject->getId(), artistObject));
+    }
+    sqlite3_finalize(statement);
+    
+    /**
+     *  Create Report for artists here
+     */
+    
+    Cd *cdObject;
+    sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        cdObject = new Cd();
+        cdObject->setId(sqlite3_column_int(statement, 0));
+        cdObject->setArtistId(sqlite3_column_int(statement, 2));
+        cdObject->setTitle(sqlite3_column_text(statement, 1));
+        cdObject->setCatalogue(sqlite3_column_text(statement, 3));
+        cdMap.insert(pair<int, Cd*>(cdObject->getId(), cdObject));
+    }
+    sqlite3_finalize(statement);
+    
+    /**
+     *  Create report for cds here
+     */
+    
+    Track *trackObject;
+    sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        trackObject = new Track();
+        trackObject->setCdId(sqlite3_column_int(statement, 0));
+        trackObject->setTrackId(sqlite3_column_int(statement, 1));
+        trackObject->setTitle(sqlite3_column_text(statement, 2));
+        trackObjects.push_back(trackObject);
+        trackMap.insert( pair<pair<int, int>, Track*> (pair<int, int>(trackObject->getCdId(), trackObject->getTrackId()), trackObject));
+    }
+    sqlite3_finalize(statement);
+    
+    /**
+     *  Integrity Checks
+     */
+    
+    for (map<int, Cd*>::iterator it = cdMap.begin();
+         it != cdMap.end(); ++it) {
+        Artist *artist = it->second->getArtist(4, artistMap);
+        if (artist == NULL){
+            cerr << "\nArtist was not found" << endl << endl;
+            break;
+        } else {
+            cout << endl << artist->getName() << endl << endl;
+            break;
+        }
+    }
+    
+    for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
+         it != trackMap.end(); ++it) {
+        Cd *cd = it->second->getCd(1, cdMap);
+        if (cd == NULL){
+            cerr << "CD was not found" << endl << endl;
+            break;
+        } else {
+            cout << endl << cd->getTitle() << endl << endl;
+            break;
+        }
+
+    }
+    
+    /* Simulate breaking the integrity of the database by inserting a record into the database */
+    sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+    strcpy(sql, "insert into cd(id, title, artist_id, catalogue) values(7, 'Northern Start', 5, 'B00004YMST');");
+    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
+    if (rc != SQLITE_OK) {
+        cerr << "SQL ERROR: " << zErrMsg << endl;
+        sqlite3_free(zErrMsg);
+    }
+    free(sql);
+    
+    
+    for (map<int, Cd*>::iterator it = cdMap.begin();
+         it != cdMap.end(); ++it) {
+        Artist *artist = it->second->getArtist(5, artistMap);
+        if (artist == NULL){
+            cerr << "\nArtist object does not exist" << endl << endl;
+            break;
+        } else {
+            cout << endl << artist->getName() << endl << endl;
+            break;
+        }
+    }
+    
+    
+//    map<pair<int, int>, Track*>::iterator iter = trackMap.begin();
+//    
+//    iter = trackMap.find(pair<int, int>(1, 6));
+//    
+//    cout << iter->second->getTitle() << endl <<endl;
+//    if (iter != trackMap.end()){
+//        
+//    }
+    
+    /**
+     *  Create report for tracks here
+     */
+    
+    
+    
+    
+//    for (int i = 0; i < trackObjects.size(); i++) {
+//        cout << trackObjects[i]->getCdId() << endl << trackObjects[i]->getTrackId() << endl
+//        << trackObjects[i]->getTitle() << endl << endl;
+//    }
+
+
+//    Artist *artistObject;
+//    sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
+//    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+//        // print each field 0, field 1, etc..
+//        artistObject = new Artist();
+//        artistObject->setId(sqlite3_column_int(statement, 0));
+//        artistObject->setName(sqlite3_column_text(statement, 1));
+//        artistObjects.push_back(artistObject);
+//    }
+//    sqlite3_finalize(statement);
+    
+    
+    sql = (char*) malloc (SQL_STMT_SIZE * sizeof(char));
+    free(sql);
     
     sqlite3_close(db);
     return 0;
@@ -466,61 +623,68 @@ void tokenizeTracks (vector<trackRecord*> &tracks, trackRecord *track, ifstream 
  *  the song database. Currently only used to update the track table titles
  ********************************************************************************/
 void execDatabaseMenu(sqlite3 **db) {
-    int choice;
+    int choice = -1;
+    int tableChoice = -1;
+    string title;
     char *zErrMsg;
     char *sql;
     int rc;
+    bool notValidChoice = true;
     const char *data = "Callback function called";
     
     cout << "DATABASE MENU" << endl << "_______________________________________" << endl << endl;
-    cout << "(1) Insert\n(2) Delete\n(3) Update\n(4) Delete All\n";
-    cin >> choice;
-    switch (choice) {
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            int tableChoice;
-            cout << "Please select a database table\n";
-            cout << "(1) artist\n(2) cd\n(3) track\n";
-            cin >> tableChoice;
-            switch (tableChoice) {
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    cout << "Please select a record to update (cd_id, track_id)\n";
-                    string cd_id, track_id;
-                    cout << "cd_id: ";
-                    cin >> cd_id;
-                    cout << "track_id: ";
-                    cin >> track_id;
-                    cout << "Please enter new title: ";
-                    string title;
-                    cin >> title;
-                    sql = (char *) malloc (100 * sizeof(char));
-                    strcpy(sql, "update track set title='");
-                    strcat(sql, title.c_str());
-                    strcat(sql, "' where cd_id=");
-                    strcat(sql, cd_id.c_str());
-                    strcat(sql, " and track_id=");
-                    strcat(sql, track_id.c_str());
-                    rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
-                    if (rc != SQLITE_OK) {
-                        cerr << "SQL ERROR: " << zErrMsg << endl;
-                    }
-                    break;
+    while (notValidChoice) {
+        cout << "(1) Update\n";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+            {
+                notValidChoice = false;
+                cout << "Please select a database table\n";
+                cout << "(1) track\n";
+                break;
             }
-            if (tableChoice != 1 && tableChoice != 2 && tableChoice != 3) {
-                cerr << "Invalid database table choice, please try again\n";
+            default:
+            {
+                cerr << "Invalid menu choice, please try again\n";
+                break;
             }
-            break;
-        case 4:
-            break;
-        default:
-            cerr << "Invalid menu choice, please try again\n";
-            break;
+        }
+    }
+    
+    bool notValidTable = true;
+    while (notValidTable) {
+        cin >> tableChoice;
+        switch (tableChoice) {
+            case 1:
+            {
+                notValidTable = false;
+                cout << "Please select a record to update (cd_id, track_id)\n";
+                string cd_id, track_id;
+                cout << "cd_id: ";
+                cin >> cd_id;
+                cout << "track_id: ";
+                cin >> track_id;
+                cout << "Please enter new title: ";
+                cin >> title;
+                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+                strcpy(sql, "update track set title='");
+                strcat(sql, title.c_str());
+                strcat(sql, "' where cd_id=");
+                strcat(sql, cd_id.c_str());
+                strcat(sql, " and track_id=");
+                strcat(sql, track_id.c_str());
+                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+                if (rc != SQLITE_OK) {
+                    cerr << "SQL ERROR: " << zErrMsg << endl;
+                }
+                break;
+            }
+            default:
+            {
+                cerr << "Invalid menu choice, please try again\n";
+                break;
+            }
+        }
     }
 }
