@@ -5,4 +5,6 @@ If you want to execute this sqlite3 database simulation program, clone to deskto
 
 If the program does not compile and you wish to fix it yourself, make sure to have a debugger (GDB on Linux or LLDB on MAC). Type gdb executable_name or lldb exectuable_name in terminal. Google commands for debugging.
 
+When running, when the menu system pops up, you should choose the first choice and follow through with the instructions. At the end of the program, the menu system should pop back up. This time you should choose to delete all records from the database. If you do not take these steps, the program will not demonstrate what it should.
+
 Sorry I did not provide Windows instruction, I am a UNIX man! :)
