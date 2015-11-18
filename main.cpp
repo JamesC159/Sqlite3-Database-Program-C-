@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     strcat(sql, "name VARCHAR(100) NOT NULL);");
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
     if (rc != SQLITE_OK) {
-        cerr << "SQL ERROR: " << zErrMsg << " COULD NOT CREATE TABLE artist" << endl;
+        cerr << "SQL ERROR: " << zErrMsg << endl;
         sqlite3_free(zErrMsg);
     } else {
         cout << "artist table created successfully!" << endl;
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
     strcat(sql, "catalogue VARCHAR(30) NOT NULL);");
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
     if (rc != SQLITE_OK) {
-        cerr << "SQL ERROR: " << zErrMsg << " COULD NOT CREATE TABLE cd" << endl;
+        cerr << "SQL ERROR: " << zErrMsg << endl;
         sqlite3_free(zErrMsg);
     } else {
         cout << "cd table created successfully!" << endl;
@@ -169,12 +169,14 @@ int main(int argc, char **argv) {
     strcat(sql, "PRIMARY KEY(cd_id, track_id));");
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
     if (rc != SQLITE_OK) {
-        cerr << "SQL ERROR: " << zErrMsg << " COULD NOT CREATE TABLE track" << endl;
+        cerr << "SQL ERROR: " << zErrMsg << endl;
         sqlite3_free(zErrMsg);
     } else {
         cout << "track table created successfully!" << endl;
     }
     free(sql);
+    
+    cout << endl;
     
     /* Insert records into artist, cd, and track tables */
     for (int i = 0; i < artists.size(); i++) {
@@ -252,32 +254,44 @@ int main(int argc, char **argv) {
     
     // loop each record in artist table
     databaseOutput << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    cout << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
     sqlite3_stmt* statement;
     sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
-                        << sqlite3_column_text(statement, 1) << endl;
+        << sqlite3_column_text(statement, 1) << endl;
+        cout << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
+        << sqlite3_column_text(statement, 1) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
     databaseOutput << endl;
+    cout << endl;
     
     databaseOutput << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    cout << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
     sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
-                        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
-                        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
+        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+        cout << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
+        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
+        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
     databaseOutput << endl;
+    cout << endl;
     
     databaseOutput << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    cout << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
     sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-                        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+        cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
@@ -294,18 +308,51 @@ int main(int argc, char **argv) {
     /* Menu system to select updating a database record */
     dbMenu(&db);
     
+    /* NO NEED TO UPDATE ARTISTS OR CDS FOR THIS ASSIGNMENT */
+    
+//    databaseOutput << "\nARTIST DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+//    cout << "\nARTIST DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+//    sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
+//    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+//        databaseOutput << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
+//        << sqlite3_column_int(statement, 1) << endl;
+//        cout << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
+//        << sqlite3_column_int(statement, 1) << endl;
+//    }
+//    sqlite3_finalize(statement);  // and done
+//    
+//    databaseOutput << endl;
+//    cout << endl;
+//
+//    databaseOutput << "\nCD DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+//    cout << "\nCD DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+//    sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
+//    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+//        databaseOutput << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
+//        << sqlite3_column_int(statement, 1) <<  " cd artist id = " << sqlite3_column_text(statement, 2)
+//        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+//        cout << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
+//        << sqlite3_column_int(statement, 1) <<  " cd artist id = " << sqlite3_column_text(statement, 2)
+//        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+//    }
+//    sqlite3_finalize(statement);  // and done
+//    
+//    databaseOutput << endl;
+//    cout << endl;
+    
     /* Display updated record */
     databaseOutput << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
     cout << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
     sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
         databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-                    << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
         cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-                << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
     }
     sqlite3_finalize(statement);  // and done
     
+    databaseOutput << endl;
     cout << endl;
     
     
@@ -322,7 +369,6 @@ int main(int argc, char **argv) {
     Artist *artistObject;
     sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
     while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        // print each field 0, field 1, etc..
         artistObject = new Artist();
         artistObject->setId(sqlite3_column_int(statement, 0));
         artistObject->setName(sqlite3_column_text(statement, 1));
@@ -330,6 +376,20 @@ int main(int argc, char **argv) {
         artistMap.insert(pair<int, Artist*>(artistObject->getId(), artistObject));
     }
     sqlite3_finalize(statement);
+    
+    cout << "ARTIST GENERATED REPORT\n_____________________________________________________\n\n";
+    databaseOutput << "ARTIST GENERATED REPORT\n_____________________________________________________\n\n";
+    
+    for (map<int, Artist*>::iterator it = artistMap.begin();
+         it != artistMap.end(); ++it) {
+        cout << "Artist ID = " << it->second->getId() << " Artist Name = " << it->second->getName() << endl;
+        databaseOutput << "Artist ID = " << it->second->getId() << " Artist Name = " << it->second->getName() << endl;
+    }
+    
+    cout << endl;
+    cout << "CD GENERATED REPORT\n_____________________________________________________\n\n";
+    databaseOutput << endl;
+    databaseOutput << "CD GENERATED REPORT\n_____________________________________________________\n\n";
     
     /**
      *  Create Report for artists here
@@ -347,6 +407,21 @@ int main(int argc, char **argv) {
     }
     sqlite3_finalize(statement);
     
+    for (map<int, Cd*>::iterator it = cdMap.begin();
+         it != cdMap.end(); ++it) {
+        cout << "CD ID = " << it->second->getId() << " CD Title = " << it->second->getTitle()
+        <<  " CD Artist ID = " << it->second->getArtistId() << " CD Catalogue = "
+        << it->second->getCatalogue() << endl;
+        databaseOutput << "CD ID = " << it->second->getId() << " CD Title = " << it->second->getTitle()
+        <<  " CD Artist ID = " << it->second->getArtistId() << " CD Catalogue = "
+        << it->second->getCatalogue() << endl;
+    }
+    
+    cout << endl;
+    cout << "TRACK GENERATED REPORT\n_____________________________________________________\n\n";
+    databaseOutput << endl;
+    databaseOutput << "TRACK GENERATED REPORT\n_____________________________________________________\n\n";
+    
     /**
      *  Create report for cds here
      */
@@ -363,12 +438,23 @@ int main(int argc, char **argv) {
     }
     sqlite3_finalize(statement);
     
+    for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
+         it != trackMap.end(); ++it) {
+        cout << "Track CD ID = " << it->second->getCdId() << " Track ID = " << it->second->getTrackId()
+        <<  " Track Title = " << it->second->getTitle() << endl;
+        databaseOutput << "Track CD ID = " << it->second->getCdId() << " Track ID = " << it->second->getTrackId()
+        <<  " Track Title = " << it->second->getTitle() << endl;
+    }
+    
+    cout << endl;
+    databaseOutput << endl;
+    
     /**
      *  Integrity Checks
      */
     
     string input = "";
-    cout << "BEGGINING INTEGRITY CHECKS\n________________________________________________________\n\n";
+    cout << "BEGINNING INTEGRITY CHECKS\n________________________________________________________\n\n";
     cout << "Please enter an Artist ID to search for the cooresponding artist in the CD map: ";
     cin >> input;
     
@@ -427,40 +513,8 @@ int main(int argc, char **argv) {
         }
     }
     
-    
-//    map<pair<int, int>, Track*>::iterator iter = trackMap.begin();
-//    
-//    iter = trackMap.find(pair<int, int>(1, 6));
-//    
-//    cout << iter->second->getTitle() << endl <<endl;
-//    if (iter != trackMap.end()){
-//        
-//    }
-    
-    /**
-     *  Create report for tracks here
-     */
-    
-    
-    
-    
-//    for (int i = 0; i < trackObjects.size(); i++) {
-//        cout << trackObjects[i]->getCdId() << endl << trackObjects[i]->getTrackId() << endl
-//        << trackObjects[i]->getTitle() << endl << endl;
-//    }
-
-
-//    Artist *artistObject;
-//    sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
-//    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-//        // print each field 0, field 1, etc..
-//        artistObject = new Artist();
-//        artistObject->setId(sqlite3_column_int(statement, 0));
-//        artistObject->setName(sqlite3_column_text(statement, 1));
-//        artistObjects.push_back(artistObject);
-//    }
-//    sqlite3_finalize(statement);
-    
+    /* Should choose to delete all records */
+    dbMenu(&db);
     
     sql = (char*) malloc (SQL_STMT_SIZE * sizeof(char));
     free(sql);
@@ -650,14 +704,42 @@ void dbMenu(sqlite3 **db) {
     
     cout << "DATABASE MENU" << endl << "_______________________________________" << endl << endl;
     while (notValidChoice) {
-        cout << "(1) Update\n";
+        cout << "(1) Update\n(2) Delete All\n";
         cin >> choice;
         switch (choice) {
             case 1:
             {
                 notValidChoice = false;
                 cout << "Please select a database table\n";
-                cout << "(1) track\n";
+                cout << "(1) Track\n(2) CD (NOT NEEDED FOR THIS ASSIGNMENT - DO NOT PRESS)\n(3) Artist (NOT NEEDED FOR THIS ASSIGNMENT - DO NOT PRESS)\n";
+                break;
+            }
+            case 2:
+            {
+                notValidChoice = false;
+                cout << "Deleting all records from the database...\n";
+                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+                strcpy(sql, "delete from artist;");
+                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+                if (rc != SQLITE_OK) {
+                    cerr << "SQL ERROR: " << zErrMsg << endl;
+                }
+                free(sql);
+                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+                strcpy(sql, "delete from cd;");
+                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+                if (rc != SQLITE_OK) {
+                    cerr << "SQL ERROR: " << zErrMsg << endl;
+                }
+                free(sql);
+                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+                strcpy(sql, "delete from track;");
+                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+                if (rc != SQLITE_OK) {
+                    cerr << "SQL ERROR: " << zErrMsg << endl;
+                }
+                cout << "Done!\n";
+                free(sql);
                 break;
             }
             default:
@@ -668,10 +750,79 @@ void dbMenu(sqlite3 **db) {
         }
     }
     
+    if (choice == 2) {
+        return;
+    }
+    
     bool notValidTable = true;
     while (notValidTable) {
         cin >> tableChoice;
         switch (tableChoice) {
+                
+                /* NO NEED TO UPDATE ARTISTS OR CDS FOR THIS ASSIGNMENT */
+                
+                
+//            case 1:
+//            {
+//                notValidTable = false;
+//                cout << "Please select a record to update (id)\n";
+//                string id, name;
+//                cout << "id: ";
+//                cin >> id;
+//                cout << "Please enter new artist name: ";
+//                cin >> name;
+//                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+//                strcpy(sql, "update artist set name='");
+//                strcat(sql, name.c_str());
+//                strcat(sql, "' where id=");
+//                strcat(sql, id.c_str());
+//                strcat(sql, ";");
+//                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+//                if (rc != SQLITE_OK) {
+//                    cerr << "SQL ERROR: " << zErrMsg << endl;
+//                }
+//                free(sql);
+//                break;
+//            }
+//            case 2:
+//            {
+//                notValidTable = false;
+//                cout << "Please select a record to update (id, artist_id)\n";
+//                string id, artist_id, title, catalogue;
+//                cout << "id: ";
+//                cin >> id;
+//                cout << "artist_id: ";
+//                cin >> artist_id;
+//                cout << "Please enter new track title: ";
+//                cin >> title;
+//                cout << "Please enter a new catalogue: ";
+//                cin >> catalogue;
+//                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+//                strcpy(sql, "update cd set title='");
+//                strcat(sql, title.c_str());
+//                strcat(sql, "' where id=");
+//                strcat(sql, id.c_str());
+//                strcat(sql, " and artist_id=");
+//                strcat(sql, artist_id.c_str());
+//                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+//                if (rc != SQLITE_OK) {
+//                    cerr << "SQL ERROR: " << zErrMsg << endl;
+//                }
+//                free(sql);
+//                sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
+//                strcat(sql, "update cd set catalogue='");
+//                strcat(sql, catalogue.c_str());
+//                strcat(sql, "' where id=");
+//                strcat(sql, id.c_str());
+//                strcat(sql, " and artist_id=");
+//                strcat(sql, artist_id.c_str());
+//                rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+//                if (rc != SQLITE_OK) {
+//                    cerr << "SQL ERROR: " << zErrMsg << endl;
+//                }
+//                free(sql);
+//                break;
+//            }
             case 1:
             {
                 notValidTable = false;
@@ -681,7 +832,7 @@ void dbMenu(sqlite3 **db) {
                 cin >> cd_id;
                 cout << "track_id: ";
                 cin >> track_id;
-                cout << "Please enter new title: ";
+                cout << "Please enter new track title : ";
                 cin >> title;
                 sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
                 strcpy(sql, "update track set title='");

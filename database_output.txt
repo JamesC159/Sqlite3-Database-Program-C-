@@ -121,3 +121,75 @@ track cd_id = 6 track artist_id = 9 track title = Ga Ga
 track cd_id = 6 track artist_id = 10 track title = Be The One
 track cd_id = 6 track artist_id = 11 track title = Closer
 track cd_id = 6 track artist_id = 12 track title = Feel The Sun
+
+ARTIST GENERATED REPORT
+_____________________________________________________
+
+Artist ID = 1 Artist Name = Pink Floyd
+Artist ID = 2 Artist Name = Genesis
+Artist ID = 3 Artist Name = Einaudi
+Artist ID = 4 Artist Name = Melanie C
+
+CD GENERATED REPORT
+_____________________________________________________
+
+CD ID = 1 CD Title = Dark Side of the Moon CD Artist ID = 1 CD Catalogue = B000024D4P
+CD ID = 2 CD Title = Wish You Were Here CD Artist ID = 1 CD Catalogue = B000024D4S
+CD ID = 3 CD Title = A Trick of the Tail CD Artist ID = 2 CD Catalogue = B000024EXM
+CD ID = 4 CD Title = Selling England By the Pound CD Artist ID = 2 CD Catalogue = B000024E9M
+CD ID = 5 CD Title = I Giorni CD Artist ID = 3 CD Catalogue = B000071WEV
+CD ID = 6 CD Title = Northern Star CD Artist ID = 4 CD Catalogue = B00004YMST
+
+TRACK GENERATED REPORT
+_____________________________________________________
+
+Track CD ID = 1 Track ID = 1 Track Title = Speak to me
+Track CD ID = 1 Track ID = 2 Track Title = Breathe
+Track CD ID = 1 Track ID = 3 Track Title = On the run
+Track CD ID = 1 Track ID = 4 Track Title = Time
+Track CD ID = 1 Track ID = 5 Track Title = Great gig in the sky
+Track CD ID = 1 Track ID = 6 Track Title = Money
+Track CD ID = 1 Track ID = 7 Track Title = Us and them
+Track CD ID = 1 Track ID = 8 Track Title = Any colour you like
+Track CD ID = 1 Track ID = 9 Track Title = Brain damage
+Track CD ID = 1 Track ID = 10 Track Title = Eclipse
+Track CD ID = 2 Track ID = 1 Track Title = Shine on you crazy diamond
+Track CD ID = 2 Track ID = 2 Track Title = Welcome to the machine
+Track CD ID = 2 Track ID = 3 Track Title = Have a cigar
+Track CD ID = 2 Track ID = 4 Track Title = Wish you were here
+Track CD ID = 2 Track ID = 5 Track Title = Shine on you crazy diamond pt.2
+Track CD ID = 3 Track ID = 1 Track Title = Dance on a volcano
+Track CD ID = 3 Track ID = 2 Track Title = Entangled
+Track CD ID = 3 Track ID = 3 Track Title = Squonk
+Track CD ID = 3 Track ID = 4 Track Title = Madman moon
+Track CD ID = 3 Track ID = 5 Track Title = Robbery assault and battery
+Track CD ID = 3 Track ID = 6 Track Title = Ripples
+Track CD ID = 3 Track ID = 7 Track Title = Trick of the tail
+Track CD ID = 3 Track ID = 8 Track Title = Los Endos
+Track CD ID = 4 Track ID = 1 Track Title = Melodia Africana (part 1)
+Track CD ID = 4 Track ID = 2 Track Title = I due fiumi
+Track CD ID = 4 Track ID = 3 Track Title = In unaltra vita
+Track CD ID = 4 Track ID = 4 Track Title = Melodia Africana (part 2)
+Track CD ID = 4 Track ID = 5 Track Title = Stella del mattino
+Track CD ID = 4 Track ID = 6 Track Title = I giorni
+Track CD ID = 4 Track ID = 7 Track Title = Samba
+Track CD ID = 4 Track ID = 8 Track Title = Melodia Africana (part 3)
+Track CD ID = 4 Track ID = 9 Track Title = La nascita delle cose segrete
+Track CD ID = 4 Track ID = 10 Track Title = Quel che resta
+Track CD ID = 4 Track ID = 11 Track Title = Inizio
+Track CD ID = 4 Track ID = 12 Track Title = Limbo
+Track CD ID = 4 Track ID = 13 Track Title = Bella notte
+Track CD ID = 4 Track ID = 14 Track Title = Canzone Africana (part 4)
+Track CD ID = 6 Track ID = 1 Track Title = Go!
+Track CD ID = 6 Track ID = 2 Track Title = Northern Star
+Track CD ID = 6 Track ID = 3 Track Title = Goin Down
+Track CD ID = 6 Track ID = 4 Track Title = I Turn To You
+Track CD ID = 6 Track ID = 5 Track Title = If That Were Me
+Track CD ID = 6 Track ID = 6 Track Title = Never Be The Same Again
+Track CD ID = 6 Track ID = 7 Track Title = Why
+Track CD ID = 6 Track ID = 8 Track Title = Suddenly Monday
+Track CD ID = 6 Track ID = 9 Track Title = Ga Ga
+Track CD ID = 6 Track ID = 10 Track Title = Be The One
+Track CD ID = 6 Track ID = 11 Track Title = Closer
+Track CD ID = 6 Track ID = 12 Track Title = Feel The Sun
+
