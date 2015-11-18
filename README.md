@@ -9,4 +9,6 @@ When running, when the menu system pops up, you should choose the first choice a
 
 #CURRENT IMPLEMENTATION DOES NOT ASSUME BAD INPUT!
 
+Nov 17th update - This program does not deal with memory leaks at the moment. The main focus was to get it working first.
+
 Sorry I did not provide Windows instruction, I am a UNIX man! :)
