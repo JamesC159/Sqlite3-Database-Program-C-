@@ -1,5 +1,5 @@
 //
-//  main2.cpp
+//  main.cpp
 //  
 //
 //  Created by James Combs on 11/14/15.
@@ -73,10 +73,23 @@ void tokenizeCds(vector<cdRecord*> &, cdRecord *, ifstream &, const char *);
 void createCdTable(sqlite3 **, const char *, char *);
 void tokenizeTracks(vector<trackRecord*> &, trackRecord *, ifstream &, const char *);
 void createTrackTable(sqlite3 **, const char *, char *);
-void insertArtists(vector<artistRecord*>, sqlite3 **, const char *, char *);
-void insertCds(vector<cdRecord*>, sqlite3 **, const char *, char *);
-void insertTracks(vector<trackRecord*>, sqlite3 **, const char *, char *);
+void insertArtists(vector<artistRecord*> &, sqlite3 **, const char *, char *);
+void insertCds(vector<cdRecord*> &, sqlite3 **, const char *, char *);
+void insertTracks(vector<trackRecord*> &, sqlite3 **, const char *, char *);
+void displayUpdates(sqlite3 **, ofstream &);
 void dbMenu(sqlite3 **);
+void printArtistRecords(sqlite3 **, ofstream &);
+void printCdRecords(sqlite3 **, ofstream &);
+void printTrackRecords(sqlite3 **, ofstream &);
+void getArtists(sqlite3 **, Artist *, map<int, Artist*> &);
+void getCds(sqlite3 **, Cd *, map<int, Cd*> &);
+void getTracks(sqlite3 **, Track *, map<pair<int, int>, Track*> &);
+void generateArtistReport(map<int, Artist*>, ofstream &);
+void generateCdReport(map<int, Cd*>, ofstream &);
+void generateTrackReport(map<pair<int, int>, Track*>, ofstream &);
+void checkCdIntegrity(map<int, Cd*>, map<int, Artist*>);
+void checkTrackIntegrity(map<pair<int, int>, Track*>, map<int, Cd*>);
+
 
 /********************************************************************************
  *  Main Function
@@ -105,6 +118,11 @@ int main(int argc, char **argv) {
     struct cdRecord *cd;
     struct trackRecord *track;
     
+    /* Objects to represent a record in the database */
+    Artist *artistObject;
+    Cd *cdObject;
+    Track *trackObject;
+    
     /* Vectors to hold objects of each table in the database */
     vector<Artist*> artistObjects;
     vector<Cd*> cdObjects;
@@ -114,7 +132,6 @@ int main(int argc, char **argv) {
     static map<int, Artist*> artistMap;
     static map<int, Cd*> cdMap;
     static map<pair<int, int>, Track*> trackMap;
-    
     
     /* Open files */
     openInFiles(artistIn, cdIn, trackIn);
@@ -141,55 +158,17 @@ int main(int argc, char **argv) {
     insertCds(cds, &db, data, zErrMsg);
     insertTracks(tracks, &db, data, zErrMsg);
     
-    
     /* PART A3 - loop each record in database tables */
-    databaseOutput << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
-    cout << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
-    sqlite3_stmt* statement;
-    sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        databaseOutput << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
-        << sqlite3_column_text(statement, 1) << endl;
-        cout << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
-        << sqlite3_column_text(statement, 1) << endl;
-    }
-    sqlite3_finalize(statement);  // and done
-    
-    databaseOutput << endl;
-    cout << endl;
-    
-    databaseOutput << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
-    cout << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
-    sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        databaseOutput << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
-        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
-        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
-        cout << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
-        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
-        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
-    }
-    sqlite3_finalize(statement);  // and done
-    
-    databaseOutput << endl;
-    cout << endl;
-    
-    databaseOutput << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
-    cout << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
-    sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
-        cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
-    }
-    sqlite3_finalize(statement);  // and done
-    
-    cout << endl;
-    
+    printArtistRecords(&db, databaseOutput);
+    printCdRecords(&db, databaseOutput);
+    printTrackRecords(&db, databaseOutput);
     
     /* PART A4 - Menu system to select updating a database record */
     dbMenu(&db);
+    
+    /* PART A4 - Display updated records */
+    displayUpdates(&db, databaseOutput);
+    
     
     /* NO NEED TO UPDATE ARTISTS OR CDS FOR THIS ASSIGNMENT */
     
@@ -223,20 +202,6 @@ int main(int argc, char **argv) {
 //    databaseOutput << endl;
 //    cout << endl;
     
-    /* PART A4 - Display updated records */
-    databaseOutput << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
-    cout << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
-    sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
-        cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
-        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
-    }
-    sqlite3_finalize(statement);  // and done
-    
-    databaseOutput << endl;
-    cout << endl;
     
     /**
      *  Here we should delete all the records from the database. But if doing so,
@@ -250,125 +215,21 @@ int main(int argc, char **argv) {
     
     
     /* PART B2 - Get data from the database to create objects */
-    Artist *artistObject;
-    sqlite3_prepare_v2(db, "SELECT * FROM artist", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        artistObject = new Artist();
-        artistObject->setId(sqlite3_column_int(statement, 0));
-        artistObject->setName(sqlite3_column_text(statement, 1));
-        artistObjects.push_back(artistObject);
-        
-        /* PART B3 - Map for each object */
-        artistMap.insert(pair<int, Artist*>(artistObject->getId(), artistObject));
-    }
-    sqlite3_finalize(statement);
-    
     /* PART B2 - Generate a report for the objects */
-    cout << "ARTIST GENERATED REPORT\n_____________________________________________________\n\n";
-    databaseOutput << "ARTIST GENERATED REPORT\n_____________________________________________________\n\n";
-    
-    for (map<int, Artist*>::iterator it = artistMap.begin();
-         it != artistMap.end(); ++it) {
-        cout << "Artist ID = " << it->second->getId() << " Artist Name = " << it->second->getName() << endl;
-        databaseOutput << "Artist ID = " << it->second->getId() << " Artist Name = " << it->second->getName() << endl;
-    }
-    
-    
-    Cd *cdObject;
-    sqlite3_prepare_v2(db, "SELECT * FROM cd", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        cdObject = new Cd();
-        cdObject->setId(sqlite3_column_int(statement, 0));
-        cdObject->setArtistId(sqlite3_column_int(statement, 2));
-        cdObject->setTitle(sqlite3_column_text(statement, 1));
-        cdObject->setCatalogue(sqlite3_column_text(statement, 3));
-        
-        /* PART B3 - Map for each object */
-        cdMap.insert(pair<int, Cd*>(cdObject->getId(), cdObject));
-    }
-    sqlite3_finalize(statement);
-    
-    /* PART B2 - Generate a report for the objects */
-    cout << endl;
-    cout << "CD GENERATED REPORT\n_____________________________________________________\n\n";
-    databaseOutput << endl;
-    databaseOutput << "CD GENERATED REPORT\n_____________________________________________________\n\n";
-    
-    for (map<int, Cd*>::iterator it = cdMap.begin();
-         it != cdMap.end(); ++it) {
-        cout << "CD ID = " << it->second->getId() << " CD Title = " << it->second->getTitle()
-        <<  " CD Artist ID = " << it->second->getArtistId() << " CD Catalogue = "
-        << it->second->getCatalogue() << endl;
-        databaseOutput << "CD ID = " << it->second->getId() << " CD Title = " << it->second->getTitle()
-        <<  " CD Artist ID = " << it->second->getArtistId() << " CD Catalogue = "
-        << it->second->getCatalogue() << endl;
-    }
-
-    Track *trackObject;
-    sqlite3_prepare_v2(db, "SELECT * FROM track", -1, &statement, NULL);
-    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
-        trackObject = new Track();
-        trackObject->setCdId(sqlite3_column_int(statement, 0));
-        trackObject->setTrackId(sqlite3_column_int(statement, 1));
-        trackObject->setTitle(sqlite3_column_text(statement, 2));
-        trackObjects.push_back(trackObject);
-        
-        /* PART B3 - Map for each object */
-        trackMap.insert( pair<pair<int, int>, Track*> (pair<int, int>(trackObject->getCdId(), trackObject->getTrackId()), trackObject));
-    }
-    sqlite3_finalize(statement);
-    
-    /* PART B2 - Generate a report for the objects */
-    cout << endl;
-    cout << "TRACK GENERATED REPORT\n_____________________________________________________\n\n";
-    databaseOutput << endl;
-    databaseOutput << "TRACK GENERATED REPORT\n_____________________________________________________\n\n";
-    
-    for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
-         it != trackMap.end(); ++it) {
-        cout << "Track CD ID = " << it->second->getCdId() << " Track ID = " << it->second->getTrackId()
-        <<  " Track Title = " << it->second->getTitle() << endl;
-        databaseOutput << "Track CD ID = " << it->second->getCdId() << " Track ID = " << it->second->getTrackId()
-        <<  " Track Title = " << it->second->getTitle() << endl;
-    }
+    getArtists(&db, artistObject, artistMap);
+    generateArtistReport(artistMap, databaseOutput);
+    getCds(&db, cdObject, cdMap);
+    generateCdReport(cdMap, databaseOutput);
+    getTracks(&db, trackObject, trackMap);
+    generateTrackReport(trackMap, databaseOutput);
     
     cout << endl;
     databaseOutput << endl;
     
     /* PART B4 - Implementation of Integrity Checks */
-    string input = "";
     cout << "BEGINNING INTEGRITY CHECKS\n________________________________________________________\n\n";
-    cout << "Please enter an Artist ID to search for the cooresponding artist in the CD map: ";
-    cin >> input;
-    
-    for (map<int, Cd*>::iterator it = cdMap.begin();
-         it != cdMap.end(); ++it) {
-        Artist *artist = it->second->getArtist(atoi(input.c_str()), artistMap);
-        if (artist == NULL){
-            cerr << "Integrity Corrupted! Artist object does not exist" << endl << endl;
-            break;
-        } else {
-            cout << "Artist: " << artist->getName() << endl << endl;
-            break;
-        }
-    }
-    
-    cout << "Please enter a CD ID to search for the cooresponding CD in the Track map: ";
-    cin >> input;
-    
-    for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
-         it != trackMap.end(); ++it) {
-        Cd *cd = it->second->getCd(atoi(input.c_str()
-                              ), cdMap);
-        if (cd == NULL){
-            cerr << "Integrity Corrupted! CD object does not exist" << endl << endl;
-            break;
-        } else {
-            cout << "CD: " << cd->getTitle() << endl << endl;
-            break;
-        }
-
-    }
+    checkCdIntegrity(cdMap, artistMap);
+    checkTrackIntegrity(trackMap, cdMap);
     
     /* PART B4 - Simulate breaking the integrity of the database by inserting a record into the database */
     cout << "SIMULATING INTEGRITY CORRUPTION\n________________________________________________________\n\n";
@@ -476,6 +337,7 @@ void tokenizeArtists (vector<artistRecord*> &artists, artistRecord *artist, ifst
                 }
                 if (isalpha(token[i])) {
                     foundAlpha = true;
+                    break;
                 }
             }
             if (foundAlpha) {
@@ -525,6 +387,7 @@ void tokenizeCds(vector<cdRecord*> &cds, cdRecord *cd, ifstream &cdIn, const cha
     /* Now tokenize cd.txt */
     while (getline(cdIn, line)) {
         cd = new cdRecord();
+        string temp(line);
         char *linedup = strdup(line.c_str());   //Copy the string, must free since strdup allocated memory
         token = strtok(linedup, DELIMS);
         do {
@@ -535,6 +398,7 @@ void tokenizeCds(vector<cdRecord*> &cds, cdRecord *cd, ifstream &cdIn, const cha
                 }
                 if (isalpha(token[i])) {
                     foundAlpha = true;
+                    break;
                 }
             }
             if (foundAlpha && foundFirstString) {
@@ -602,6 +466,7 @@ void tokenizeTracks (vector<trackRecord*> &tracks, trackRecord *track, ifstream 
                 }
                 if (isalpha(token[i])) {
                     foundAlpha = true;
+                    break;
                 }
             }
             if (!foundAlpha && foundFirstId) {
@@ -622,6 +487,9 @@ void tokenizeTracks (vector<trackRecord*> &tracks, trackRecord *track, ifstream 
     }
 }
 
+/********************************************************************************
+ *  Creates table for track in database
+ ********************************************************************************/
 void createTrackTable(sqlite3 **db, const char *data, char *zErrMsg) {
     char *sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
     strcpy(sql, "create table track ( cd_id INTEGER NOT NULL,");
@@ -638,7 +506,10 @@ void createTrackTable(sqlite3 **db, const char *data, char *zErrMsg) {
     free(sql);
 }
 
-void insertArtists(vector<artistRecord*> artists, sqlite3 **db, const char *data, char *zErrMsg) {
+/********************************************************************************
+ *  Insert Artists into the artist table
+ ********************************************************************************/
+void insertArtists(vector<artistRecord*> &artists, sqlite3 **db, const char *data, char *zErrMsg) {
     for (int i = 0; i < artists.size(); i++) {
         char *idBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         sprintf(idBuf, "%d", artists[i]->id);  // convert artist id's into char*'s
@@ -658,7 +529,10 @@ void insertArtists(vector<artistRecord*> artists, sqlite3 **db, const char *data
     }
 }
 
-void insertCds(vector<cdRecord*> cds, sqlite3 **db, const char *data, char *zErrMsg) {
+/********************************************************************************
+ *  Insert CDs into the cd table
+ ********************************************************************************/
+void insertCds(vector<cdRecord*> &cds, sqlite3 **db, const char *data, char *zErrMsg) {
     for (int i = 0; i < cds.size(); i++) {
         char *idBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         char *artistIdBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
@@ -685,7 +559,10 @@ void insertCds(vector<cdRecord*> cds, sqlite3 **db, const char *data, char *zErr
     }
 }
 
-void insertTracks(vector<trackRecord*> tracks, sqlite3 **db, const char *data, char *zErrMsg) {
+/********************************************************************************
+ *  Insert tracks into the track table
+ ********************************************************************************/
+void insertTracks(vector<trackRecord*> &tracks, sqlite3 **db, const char *data, char *zErrMsg) {
     for (int i = 0; i < tracks.size(); i++) {
         char *cdIdBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
         char *trackIdBuf = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
@@ -876,4 +753,242 @@ void dbMenu(sqlite3 **db) {
             }
         }
     }
+}
+
+/********************************************************************************
+ *  Print all artists from the artist table
+ ********************************************************************************/
+void printArtistRecords(sqlite3 **db, ofstream &databaseOutput) {
+    databaseOutput << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    cout << "ARTIST DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    sqlite3_stmt* statement;
+    sqlite3_prepare_v2(*db, "SELECT * FROM artist", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        databaseOutput << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
+        << sqlite3_column_text(statement, 1) << endl;
+        cout << "artist id = " << sqlite3_column_int(statement, 0) << " artist name = "
+        << sqlite3_column_text(statement, 1) << endl;
+    }
+    sqlite3_finalize(statement);  // and done
+    
+    databaseOutput << endl;
+    cout << endl;
+}
+
+/********************************************************************************
+ *  Print all CDs from the cd table
+ ********************************************************************************/
+void printCdRecords(sqlite3 **db, ofstream &databaseOutput) {
+    sqlite3_stmt* statement;
+    databaseOutput << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    cout << "CD DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    sqlite3_prepare_v2(*db, "SELECT * FROM cd", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        databaseOutput << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
+        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
+        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+        cout << "cd id = " << sqlite3_column_int(statement, 0) << " cd title = "
+        << sqlite3_column_text(statement, 1) <<  " cd artist_id = " << sqlite3_column_int(statement, 2)
+        << " cd catalogue = " << sqlite3_column_text(statement, 3) << endl;
+    }
+    sqlite3_finalize(statement);  // and done
+    
+    databaseOutput << endl;
+    cout << endl;
+}
+
+/********************************************************************************
+ *  Print all tracks from the track table
+ ********************************************************************************/
+void printTrackRecords(sqlite3 **db, ofstream &databaseOutput) {
+    sqlite3_stmt* statement;
+    databaseOutput << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    cout << "TRACK DATABASE RECORDS\n______________________________________________________________________________\n\n";
+    sqlite3_prepare_v2(*db, "SELECT * FROM track", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track id = "
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+        cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track id = "
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+    }
+    sqlite3_finalize(statement);  // and done
+    
+    databaseOutput << endl;
+    cout << endl;
+}
+
+/********************************************************************************
+ *  Display updates to the track table
+ ********************************************************************************/
+void displayUpdates(sqlite3 **db, ofstream &databaseOutput) {
+    sqlite3_stmt *statement;
+    databaseOutput << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+    cout << "\nTRACK DATABASE RECORDS UPDATED\n______________________________________________________________________________\n\n";
+    sqlite3_prepare_v2(*db, "SELECT * FROM track", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        databaseOutput << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+        cout << "track cd_id = " << sqlite3_column_int(statement, 0) << " track artist_id = "
+        << sqlite3_column_int(statement, 1) <<  " track title = " << sqlite3_column_text(statement, 2) << endl;
+    }
+    sqlite3_finalize(statement);  // and done
+    
+    databaseOutput << endl;
+    cout << endl;
+}
+
+/********************************************************************************
+ *  Get all artist records from the artist table and place them into the
+ *  map that contains artists
+ ********************************************************************************/
+void getArtists(sqlite3 **db, Artist *artistObject, map<int, Artist*> &artistMap) {
+    sqlite3_stmt *statement;
+    sqlite3_prepare_v2(*db, "SELECT * FROM artist", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        artistObject = new Artist();
+        artistObject->setId(sqlite3_column_int(statement, 0));
+        artistObject->setName(sqlite3_column_text(statement, 1));
+        
+        /* PART B3 - Map for each object */
+        artistMap.insert(pair<int, Artist*>(artistObject->getId(), artistObject));
+    }
+    sqlite3_finalize(statement);
+}
+
+/********************************************************************************
+ *  Get all ds records from the cds table and place them into the
+ *  map that contains cds
+ ********************************************************************************/
+void getCds(sqlite3 **db, Cd *cdObject, map<int, Cd*> &cdMap) {
+    sqlite3_stmt *statement;
+    sqlite3_prepare_v2(*db, "SELECT * FROM cd", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        cdObject = new Cd();
+        cdObject->setId(sqlite3_column_int(statement, 0));
+        cdObject->setArtistId(sqlite3_column_int(statement, 2));
+        cdObject->setTitle(sqlite3_column_text(statement, 1));
+        cdObject->setCatalogue(sqlite3_column_text(statement, 3));
+        
+        /* PART B3 - Map for each object */
+        cdMap.insert(pair<int, Cd*>(cdObject->getId(), cdObject));
+    }
+    sqlite3_finalize(statement);
+}
+
+/********************************************************************************
+ *  Get all tracks records from the tracks table and place them into the
+ *  map that contains tracks
+ ********************************************************************************/
+void getTracks(sqlite3 **db, Track *trackObject, map<pair<int, int>, Track*> &trackMap) {
+    sqlite3_stmt *statement;
+    sqlite3_prepare_v2(*db, "SELECT * FROM track", -1, &statement, NULL);
+    while (sqlite3_step(statement) == SQLITE_ROW) {  // get the record
+        trackObject = new Track();
+        trackObject->setCdId(sqlite3_column_int(statement, 0));
+        trackObject->setTrackId(sqlite3_column_int(statement, 1));
+        trackObject->setTitle(sqlite3_column_text(statement, 2));
+        
+        /* PART B3 - Map for each object */
+        trackMap.insert( pair<pair<int, int>, Track*> (pair<int, int>(trackObject->getCdId(), trackObject->getTrackId()), trackObject));
+    }
+    sqlite3_finalize(statement);
+}
+
+/********************************************************************************
+ *  Print a report for all artists in the artist table
+ ********************************************************************************/
+void generateArtistReport(map<int, Artist*> artistMap, ofstream &databaseOutput) {
+    cout << "ARTIST GENERATED REPORT\n_____________________________________________________\n\n";
+    databaseOutput << "ARTIST GENERATED REPORT\n_____________________________________________________\n\n";
+    
+    for (map<int, Artist*>::iterator it = artistMap.begin();
+         it != artistMap.end(); ++it) {
+        cout << "Artist ID = " << it->second->getId() << " Artist Name = " << it->second->getName() << endl;
+        databaseOutput << "Artist ID = " << it->second->getId() << " Artist Name = " << it->second->getName() << endl;
+    }
+}
+
+/********************************************************************************
+ *  Print a report for all cds in the cd table
+ ********************************************************************************/
+void generateCdReport(map<int, Cd*> cdMap, ofstream &databaseOutput) {
+    cout << endl;
+    cout << "CD GENERATED REPORT\n_____________________________________________________\n\n";
+    databaseOutput << endl;
+    databaseOutput << "CD GENERATED REPORT\n_____________________________________________________\n\n";
+    
+    for (map<int, Cd*>::iterator it = cdMap.begin();
+         it != cdMap.end(); ++it) {
+        cout << "CD ID = " << it->second->getId() << " CD Title = " << it->second->getTitle()
+        <<  " CD Artist ID = " << it->second->getArtistId() << " CD Catalogue = "
+        << it->second->getCatalogue() << endl;
+        databaseOutput << "CD ID = " << it->second->getId() << " CD Title = " << it->second->getTitle()
+        <<  " CD Artist ID = " << it->second->getArtistId() << " CD Catalogue = "
+        << it->second->getCatalogue() << endl;
+    }
+}
+
+/********************************************************************************
+ *  Print a report for all tracks in the track table
+ ********************************************************************************/
+void generateTrackReport(map<pair<int, int>, Track*> trackMap, ofstream &databaseOutput) {
+    cout << endl;
+    cout << "TRACK GENERATED REPORT\n_____________________________________________________\n\n";
+    databaseOutput << endl;
+    databaseOutput << "TRACK GENERATED REPORT\n_____________________________________________________\n\n";
+    
+    for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
+         it != trackMap.end(); ++it) {
+        cout << "Track CD ID = " << it->second->getCdId() << " Track ID = " << it->second->getTrackId()
+        <<  " Track Title = " << it->second->getTitle() << endl;
+        databaseOutput << "Track CD ID = " << it->second->getCdId() << " Track ID = " << it->second->getTrackId()
+        <<  " Track Title = " << it->second->getTitle() << endl;
+    }
+}
+
+/********************************************************************************
+ *  Checks integrity of the cd map. Meaning that it checks to see if the user
+ *  Input artist id actually exists in the cd map and actually exists as an object
+ ********************************************************************************/
+void checkCdIntegrity(map<int, Cd*> cdMap, map<int, Artist*> artistMap) {
+    string input = "";
+    cout << "Please enter an Artist ID to search for the cooresponding artist in the CD map: ";
+    cin >> input;
+    
+    for (map<int, Cd*>::iterator it = cdMap.begin();
+         it != cdMap.end(); ++it) {
+        Artist *artist = it->second->getArtist(atoi(input.c_str()), artistMap);
+        if (artist == NULL){
+            cerr << "Integrity Corrupted! Artist object does not exist" << endl << endl;
+            break;
+        } else {
+            cout << "Artist: " << artist->getName() << endl << endl;
+            break;
+        }
+    }
+}
+
+/********************************************************************************
+ *  Checks integrity of the track map. Meaning that it checks to see if the user
+ *  Input cd id actually exists in the track map and actually exists as an object
+ ********************************************************************************/
+void checkTrackIntegrity(map<pair<int, int>, Track*> trackMap, map<int, Cd*> cdMap) {
+    string input = "";
+    cout << "Please enter a CD ID to search for the cooresponding CD in the Track map: ";
+    cin >> input;
+    
+    for (map<pair<int, int>, Track*>::iterator it = trackMap.begin();
+         it != trackMap.end(); ++it) {
+        Cd *cd = it->second->getCd(atoi(input.c_str()
+                                        ), cdMap);
+        if (cd == NULL){
+            cerr << "Integrity Corrupted! CD object does not exist" << endl << endl;
+            break;
+        } else {
+            cout << "CD: " << cd->getTitle() << endl << endl;
+            break;
+        }
+        
+    }
+
 }

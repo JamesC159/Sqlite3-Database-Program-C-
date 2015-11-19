@@ -19,55 +19,56 @@ cd id = 6 cd title = Northern Star cd artist_id = 4 cd catalogue = B00004YMST
 TRACK DATABASE RECORDS
 ______________________________________________________________________________
 
-track cd_id = 1 track artist_id = 1 track title = Speak to me
-track cd_id = 1 track artist_id = 2 track title = Breathe
-track cd_id = 1 track artist_id = 3 track title = On the run
-track cd_id = 1 track artist_id = 4 track title = Time
-track cd_id = 1 track artist_id = 5 track title = Great gig in the sky
-track cd_id = 1 track artist_id = 6 track title = Mooney
-track cd_id = 1 track artist_id = 7 track title = Us and them
-track cd_id = 1 track artist_id = 8 track title = Any colour you like
-track cd_id = 1 track artist_id = 9 track title = Brain damage
-track cd_id = 1 track artist_id = 10 track title = Eclipse
-track cd_id = 2 track artist_id = 1 track title = Shine on you crazy diamond
-track cd_id = 2 track artist_id = 2 track title = Welcome to the machine
-track cd_id = 2 track artist_id = 3 track title = Have a cigar
-track cd_id = 2 track artist_id = 4 track title = Wish you were here
-track cd_id = 2 track artist_id = 5 track title = Shine on you crazy diamond pt.2
-track cd_id = 3 track artist_id = 1 track title = Dance on a volcano
-track cd_id = 3 track artist_id = 2 track title = Entangled
-track cd_id = 3 track artist_id = 3 track title = Squonk
-track cd_id = 3 track artist_id = 4 track title = Madman moon
-track cd_id = 3 track artist_id = 5 track title = Robbery assault and battery
-track cd_id = 3 track artist_id = 6 track title = Ripples
-track cd_id = 3 track artist_id = 7 track title = Trick of the tail
-track cd_id = 3 track artist_id = 8 track title = Los Endos
-track cd_id = 4 track artist_id = 1 track title = Melodia Africana (part 1)
-track cd_id = 4 track artist_id = 2 track title = I due fiumi
-track cd_id = 4 track artist_id = 3 track title = In unaltra vita
-track cd_id = 4 track artist_id = 4 track title = Melodia Africana (part 2)
-track cd_id = 4 track artist_id = 5 track title = Stella del mattino
-track cd_id = 4 track artist_id = 6 track title = I giorni
-track cd_id = 4 track artist_id = 7 track title = Samba
-track cd_id = 4 track artist_id = 8 track title = Melodia Africana (part 3)
-track cd_id = 4 track artist_id = 9 track title = La nascita delle cose segrete
-track cd_id = 4 track artist_id = 10 track title = Quel che resta
-track cd_id = 4 track artist_id = 11 track title = Inizio
-track cd_id = 4 track artist_id = 12 track title = Limbo
-track cd_id = 4 track artist_id = 13 track title = Bella notte
-track cd_id = 4 track artist_id = 14 track title = Canzone Africana (part 4)
-track cd_id = 6 track artist_id = 1 track title = Go!
-track cd_id = 6 track artist_id = 2 track title = Northern Star
-track cd_id = 6 track artist_id = 3 track title = Goin Down
-track cd_id = 6 track artist_id = 4 track title = I Turn To You
-track cd_id = 6 track artist_id = 5 track title = If That Were Me
-track cd_id = 6 track artist_id = 6 track title = Never Be The Same Again
-track cd_id = 6 track artist_id = 7 track title = Why
-track cd_id = 6 track artist_id = 8 track title = Suddenly Monday
-track cd_id = 6 track artist_id = 9 track title = Ga Ga
-track cd_id = 6 track artist_id = 10 track title = Be The One
-track cd_id = 6 track artist_id = 11 track title = Closer
-track cd_id = 6 track artist_id = 12 track title = Feel The Sun
+track cd_id = 1 track id = 1 track title = Speak to me
+track cd_id = 1 track id = 2 track title = Breathe
+track cd_id = 1 track id = 3 track title = On the run
+track cd_id = 1 track id = 4 track title = Time
+track cd_id = 1 track id = 5 track title = Great gig in the sky
+track cd_id = 1 track id = 6 track title = Mooney
+track cd_id = 1 track id = 7 track title = Us and them
+track cd_id = 1 track id = 8 track title = Any colour you like
+track cd_id = 1 track id = 9 track title = Brain damage
+track cd_id = 1 track id = 10 track title = Eclipse
+track cd_id = 2 track id = 1 track title = Shine on you crazy diamond
+track cd_id = 2 track id = 2 track title = Welcome to the machine
+track cd_id = 2 track id = 3 track title = Have a cigar
+track cd_id = 2 track id = 4 track title = Wish you were here
+track cd_id = 2 track id = 5 track title = Shine on you crazy diamond pt.2
+track cd_id = 3 track id = 1 track title = Dance on a volcano
+track cd_id = 3 track id = 2 track title = Entangled
+track cd_id = 3 track id = 3 track title = Squonk
+track cd_id = 3 track id = 4 track title = Madman moon
+track cd_id = 3 track id = 5 track title = Robbery assault and battery
+track cd_id = 3 track id = 6 track title = Ripples
+track cd_id = 3 track id = 7 track title = Trick of the tail
+track cd_id = 3 track id = 8 track title = Los Endos
+track cd_id = 4 track id = 1 track title = Melodia Africana (part 1)
+track cd_id = 4 track id = 2 track title = I due fiumi
+track cd_id = 4 track id = 3 track title = In unaltra vita
+track cd_id = 4 track id = 4 track title = Melodia Africana (part 2)
+track cd_id = 4 track id = 5 track title = Stella del mattino
+track cd_id = 4 track id = 6 track title = I giorni
+track cd_id = 4 track id = 7 track title = Samba
+track cd_id = 4 track id = 8 track title = Melodia Africana (part 3)
+track cd_id = 4 track id = 9 track title = La nascita delle cose segrete
+track cd_id = 4 track id = 10 track title = Quel che resta
+track cd_id = 4 track id = 11 track title = Inizio
+track cd_id = 4 track id = 12 track title = Limbo
+track cd_id = 4 track id = 13 track title = Bella notte
+track cd_id = 4 track id = 14 track title = Canzone Africana (part 4)
+track cd_id = 6 track id = 1 track title = Go!
+track cd_id = 6 track id = 2 track title = Northern Star
+track cd_id = 6 track id = 3 track title = Goin Down
+track cd_id = 6 track id = 4 track title = I Turn To You
+track cd_id = 6 track id = 5 track title = If That Were Me
+track cd_id = 6 track id = 6 track title = Never Be The Same Again
+track cd_id = 6 track id = 7 track title = Why
+track cd_id = 6 track id = 8 track title = Suddenly Monday
+track cd_id = 6 track id = 9 track title = Ga Ga
+track cd_id = 6 track id = 10 track title = Be The One
+track cd_id = 6 track id = 11 track title = Closer
+track cd_id = 6 track id = 12 track title = Feel The Sun
+
 
 TRACK DATABASE RECORDS UPDATED
 ______________________________________________________________________________
@@ -77,7 +78,7 @@ track cd_id = 1 track artist_id = 2 track title = Breathe
 track cd_id = 1 track artist_id = 3 track title = On the run
 track cd_id = 1 track artist_id = 4 track title = Time
 track cd_id = 1 track artist_id = 5 track title = Great gig in the sky
-track cd_id = 1 track artist_id = 6 track title = sadfasdfasfasfafd
+track cd_id = 1 track artist_id = 6 track title = Money
 track cd_id = 1 track artist_id = 7 track title = Us and them
 track cd_id = 1 track artist_id = 8 track title = Any colour you like
 track cd_id = 1 track artist_id = 9 track title = Brain damage
@@ -148,7 +149,7 @@ Track CD ID = 1 Track ID = 2 Track Title = Breathe
 Track CD ID = 1 Track ID = 3 Track Title = On the run
 Track CD ID = 1 Track ID = 4 Track Title = Time
 Track CD ID = 1 Track ID = 5 Track Title = Great gig in the sky
-Track CD ID = 1 Track ID = 6 Track Title = sadfasdfasfasfafd
+Track CD ID = 1 Track ID = 6 Track Title = Money
 Track CD ID = 1 Track ID = 7 Track Title = Us and them
 Track CD ID = 1 Track ID = 8 Track Title = Any colour you like
 Track CD ID = 1 Track ID = 9 Track Title = Brain damage
