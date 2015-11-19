@@ -9,11 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <fstream>
-#include <ctype.h>
 #include <string>
-#include <sstream>
 #include <vector>
 #include <map>
 #include <sqlite3.h>
@@ -89,6 +88,8 @@ void generateCdReport(map<int, Cd*>, ofstream &);
 void generateTrackReport(map<pair<int, int>, Track*>, ofstream &);
 void checkCdIntegrity(map<int, Cd*>, map<int, Artist*>);
 void checkTrackIntegrity(map<pair<int, int>, Track*>, map<int, Cd*>);
+void causeCorruption(sqlite3 **, const char *, char *);
+void checkIsCorrupted(map<int, Cd*>, map<int, Artist*>);
 
 
 /********************************************************************************
@@ -234,28 +235,9 @@ int main(int argc, char **argv) {
     /* PART B4 - Simulate breaking the integrity of the database by inserting a record into the database */
     cout << "SIMULATING INTEGRITY CORRUPTION\n________________________________________________________\n\n";
     cout << "Inserting a new record with new cooresponding Artist ID into the CD table.\nThis record will not be added to the CD map\n\n";
-    sql = (char *) malloc (SQL_STMT_SIZE * sizeof(char));
-    strcpy(sql, "insert into cd(id, title, artist_id, catalogue) values(7, 'Northern Start', 5, 'B00004YMST');");
-    rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
-    if (rc != SQLITE_OK) {
-        cerr << "SQL ERROR: " << zErrMsg << endl;
-        sqlite3_free(zErrMsg);
-    }
-    free(sql);
-    
+	causeCorruption(&db, data, zErrMsg);
     cout << "Checking to see that the integrity of the system has been broken...\n\n";
-    
-    for (map<int, Cd*>::iterator it = cdMap.begin();
-         it != cdMap.end(); ++it) {
-        Artist *artist = it->second->getArtist(5, artistMap);
-        if (artist == NULL){
-            cerr << "Integrity Corrupted! Artist object does not exist!" << endl << endl;
-            break;
-        } else {
-            cout << "Artist: " << artist->getName() << endl << endl;
-            break;
-        }
-    }
+	checkIsCorrupted(cdMap, artistMap);
     
     /* PART A4 - Should choose to delete all records */
     dbMenu(&db);
@@ -991,4 +973,37 @@ void checkTrackIntegrity(map<pair<int, int>, Track*> trackMap, map<int, Cd*> cdM
         
     }
 
+}
+
+/********************************************************************************
+*  Causes corruption between database and cd map.
+********************************************************************************/
+void causeCorruption(sqlite3 **db, const char *data, char *zErrMsg) {
+	char *sql = (char *)malloc(SQL_STMT_SIZE * sizeof(char));
+	strcpy(sql, "insert into cd(id, title, artist_id, catalogue) values(7, 'Northern Start', 5, 'B00004YMST');");
+	int rc = sqlite3_exec(*db, sql, callback, (void*)data, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		cerr << "SQL ERROR: " << zErrMsg << endl;
+		sqlite3_free(zErrMsg);
+	}
+	free(sql);
+}
+
+/********************************************************************************
+*  Checks that the corruption from causeCorruption() did indeed corrupt the
+*  cd map.
+********************************************************************************/
+void checkIsCorrupted(map<int, Cd*> cdMap, map<int, Artist*> artistMap) {
+	for (map<int, Cd*>::iterator it = cdMap.begin();
+	it != cdMap.end(); ++it) {
+		Artist *artist = it->second->getArtist(5, artistMap);
+		if (artist == NULL) {
+			cerr << "Integrity Corrupted! Artist object does not exist!" << endl << endl;
+			break;
+		}
+		else {
+			cout << "Artist: " << artist->getName() << endl << endl;
+			break;
+		}
+	}
 }
