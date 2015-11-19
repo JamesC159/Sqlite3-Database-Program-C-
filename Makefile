@@ -27,3 +27,14 @@ Cd.o: Cd.cpp Cd.hpp
 
 clean:
 	-rm *.o $(FILES) $(EXECUTABLE)
+	
+install:
+	@if [ -d $(INSTDIR) ]; \
+		then \
+		cp $(EXECUTABLE) $(INSTDIR); \
+		chmod a+x $(INSTDIR)/$(EXECUTABLE); \
+		chmod og-w $(INSTDIR)/$(EXECUTABLE); \
+		echo "Installed in $(INSTDIR)"; \
+	else
+		echo "$(INSTDIR) does not exist"; \
+	fi:
